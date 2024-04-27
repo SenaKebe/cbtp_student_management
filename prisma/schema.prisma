@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+enum USERROLE{
+  TEACHER
+  PARENT
+  STUDENT
+  REGISTRAR
+  ADMIN
+}
+
+model User {
+  id            Int       @id @default(autoincrement())
+  role      USERROLE @default(STUDENT)// Making roleId optional
+  email         String?    @unique
+  password      String
+  createdDate   DateTime  @default(now())
+  profile       Profile[]
+  // student       Student[]
+  teacher       Teacher?
+  parent        Parent?
+  activeStatus  Boolean       @default(true)
+}
+
+model Profile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  firstName   String
+  lastName    String
+  middleName  String
+  dateOfBirth DateTime
+  address     String
+  imageUrl    String?
+  phone       String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model Classroom {
+  id Int       @id @default(autoincrement())
+  className   String
+  students    Student[]
+  attendance  Attendance[]
+  tests       Test[]
+  midExams    MidExam[]
+  finalExams  FinalExam[]
+  assignments Assignment[]
+  teacher Teacher[]
+  // Add other class assessment types here
+}
+
+model Subject {
+  id   Int      @id @default(autoincrement())
+  subjectName String
+  teachers    Teacher[]
+  tests       Test[]
+  midExams    MidExam[]
+  finalExams  FinalExam[]
+  assignments Assignment[]
+  totalresult  TotalResult[]
+}
+
+model Attendance {
+  id Int       @id @default(autoincrement())
+  studentID    Int
+  classroomID  Int
+  // date         DateTime
+  status       Boolean
+  createdDate   DateTime  @default(now())
+  student      Student   @relation(fields: [studentID], references: [id])
+  classroom    Classroom @relation(fields: [classroomID], references: [id])
+}
+
+model Student {
+  id    Int           @id @default(autoincrement())
+  roleId Int
+  // userID       Int
+  classroomID  Int
+  parentId     Int
+  createdDate   DateTime  @default(now())
+  studentprofile Studentprofile[]
+  attendance   Attendance[]
+  tests        Test[]
+  midExams     MidExam[]
+  finalExams   FinalExam[]
+  assignments  Assignment[]
+  totalResults TotalResult[]
+  // user         User          @relation(fields: [userID], references: [id])
+  parent       Parent        @relation(fields: [parentId], references: [id]) // Updated field name
+  classroom    Classroom     @relation(fields: [classroomID], references: [id])
+  activeStatus  Boolean       @default(true)
+}
+
+model Studentprofile {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  firstName   String
+  middleName  String
+  lastName    String
+  gender      String
+  dateOfBirth DateTime
+  address     String
+  imageUrl    String?
+  phone       String?   @unique
+  student     Student     @relation(fields: [userId], references: [id])
+}
+
+model Parent {
+  id    Int      @id @default(autoincrement())
+  userID      Int @unique
+  // studentID   Int
+  relationship String
+  user        User     @relation(fields: [userID], references: [id])
+  student     Student[]
+}
+
+
+
+
+model Teacher {
+  id Int      @id @default(autoincrement())
+  userID    Int @unique
+  subjectID Int
+  classId Int
+  user      User     @relation(fields: [userID], references: [id])
+  subject   Subject  @relation(fields: [subjectID], references: [id])
+  class   Classroom  @relation(fields: [classId], references: [id])
+
+}
+
+model Test {
+  id      Int       @id @default(autoincrement())
+  subjectID   Int
+  studentID   Int
+  classroomID Int
+  createdDate   DateTime  @default(now())
+  // Add other fields related to the test
+  result      Float?
+  subject     Subject   @relation(fields: [subjectID], references: [id])
+  classroom   Classroom @relation(fields: [classroomID], references: [id])
+  student     Student   @relation(fields: [studentID], references: [id])
+}
+
+model MidExam {
+  id   Int       @id @default(autoincrement())
+  subjectID   Int
+  studentID   Int
+  classroomID Int
+  result      Float?
+  // date        DateTime
+  createdDate   DateTime  @default(now())
+
+  subject     Subject   @relation(fields: [subjectID], references: [id])
+  classroom   Classroom @relation(fields: [classroomID], references: [id])
+  student     Student   @relation(fields: [studentID], references: [id])
+}
+model FinalExam {
+  id Int       @id @default(autoincrement())
+  subjectID   Int
+  studentID   Int
+  classroomID Int
+  // date        DateTime
+  result      Float?
+  createdDate   DateTime  @default(now())
+  subject     Subject   @relation(fields: [subjectID], references: [id])
+  classroom   Classroom @relation(fields: [classroomID], references: [id])
+  student     Student   @relation(fields: [studentID], references: [id])
+}
+
+model Assignment {
+  id Int       @id @default(autoincrement())
+  subjectID    Int
+  studentId    Int
+  classroomID  Int
+  result       Float
+  // Add other fields related to the assignment
+  student    Student     @relation(fields: [studentId], references: [id])
+  createdDate   DateTime  @default(now())
+
+  subject      Subject   @relation(fields: [subjectID], references: [id])
+  classroom    Classroom @relation(fields: [classroomID], references: [id])
+}
+
+model TotalResult {
+  id Int       @id @default(autoincrement())
+  studentID     Int
+  subjectID     Int
+  totalScore    Float
+  // Add other fields related to the total result
+  createdDate   DateTime  @default(now())
+
+  student       Student   @relation(fields: [studentID], references: [id])
+  subject       Subject   @relation(fields: [subjectID], references: [id])
+}
