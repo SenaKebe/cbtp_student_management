@@ -9,6 +9,8 @@ userRoute.post("/register/Registrar", staffController.registerRegistrarStaff);
 userRoute.put("/updateteacher/:id", staffController.updateTeacher);
 // userRoute.get("/findteacher/:id", staffController.findTeacherById);
 userRoute.post("/addClass", staffController.addClass);
+userRoute.get("/getclass", staffController.getClass);
+userRoute.get("/getsubject", staffController.getSubject)
 userRoute.post("/addSubject", staffController.addSubjet);
 userRoute.post("/login", staffController.loginUser);
 userRoute.post("/change/password", staffController.changePassword);
