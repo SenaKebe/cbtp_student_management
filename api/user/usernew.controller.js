@@ -10,8 +10,8 @@ const staffController = {
     try {
       const validatedData = adminSchema.registerTeacher.parse(req.body);
       const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-      // Create a new user
-      console.log(validatedData);
+  
+      // Check if user already exists
       const userExist = await prisma.user.findFirst({
         where: {
           OR: [
@@ -28,9 +28,12 @@ const staffController = {
           ],
         },
       });
+  
       if (userExist) {
-        return res.status(403).json({ message: "user is already exist" });
+        return res.status(403).json({ message: "User already exists",success:false });
       }
+    
+      // Create a new user
       const newUser = await prisma.user.create({
         data: {
           email: validatedData.email,
@@ -48,48 +51,33 @@ const staffController = {
           },
           teacher: {
             create: {
-              subject: { connect: { id: validatedData.subjectId } },
-              class: { connect: { id: validatedData.classId } },
+              subject: { connect: { id: parseInt(validatedData.subjectId) } },
+              class: { connect: { id: parseInt(validatedData.classId) } },
             },
           },
         },
-        // });
-
-        // const newUser = await prisma.user.create({
-        //   data: {
-        //     email: validatedData.email,
-        //     password: hashedPassword,
-        //     role: validatedData.role,
-        //     profile: {
-        //       create: {
-        //         firstName: validatedData.firstName,
-        //         lastName: validatedData.lastName,
-        //         middleName: validatedData.middleName,
-        //         address: validatedData.address,
-        //         phone: validatedData.phone,
-        //         dateOfBirth: new Date(validatedData.dateOfBirth),
-        //       },
-        //     },
-        //     teacher: {
-        //       // Associate the teacher data with the user
-        //       create: {
-        //         subject: { connect: { id: validatedData.subjectId } }, // Connect the subject
-        //         class: { connect: { id: validatedData.classId } }, // Connect the class
-        //       },
-        //     },
-        //   },
         include: {
           profile: true,
-          teacher: true, // Include the teacher data in the response
+          teacher: true,
         },
       });
-      res.status(200).json(newUser);
+      console.log(newUser);
+  
+      res.status(200).json({
+        success: true,
+        message: "Teacher registered successfully",
+        user: newUser,
+      });
     } catch (error) {
       console.error("Teacher registration error:", error);
-      res.status(500).send(error);
+      res.status(500).json({
+        success: false,
+        message: "Error registering teacher",
+        error: error.message,
+      });
     }
   },
-
+  
   registerRegistrarStaff: async (req, res, next) => {
     try {
       const validatedData = adminSchema.registerRegistrarStaff.parse(req.body);
