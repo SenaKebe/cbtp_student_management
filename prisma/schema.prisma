@@ -43,6 +43,7 @@ model Profile {
 model Classroom {
   id Int       @id @default(autoincrement())
   className   String
+  Grade       Int
   students    Student[]
   attendance  Attendance[]
   tests       Test[]

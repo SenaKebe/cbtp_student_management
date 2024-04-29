@@ -4,44 +4,71 @@ import registrarSchema from "./registrar.schema.js"
 import bcrypt from 'bcrypt'; 
 import { auth, isAdmin } from '../../middleware/auth.js'
 const clientController = {
-registerParent: async (req, res) => {
-    try {
-        const validatedData = registrarSchema.registerParent.parse(req.body);
-        const hashedPassword = await bcrypt.hash(validatedData.password, 10);
-        // Create a new user
-        const newUser = await prisma.user.create({
+    registerParent: async (req, res) => {
+        try {
+          console.log(req.body);
+          const validatedData = registrarSchema.registerParent.parse(req.body);
+      
+          // Check if the email already exists
+          const existingUser = await prisma.user.findUnique({
+            where: {
+              email: validatedData.email,
+              
+            },
+          });
+      
+          if (existingUser) {
+            return res.status(400).json({ message: "Email already exists", success: false });
+          }
+          const isphoneExist = await prisma.profile.findFirst({
+            where: {
+              phone: validatedData.phone
+            }
+          });
+          if (isphoneExist) {
+            return res.status(400).json({ message: "Phone number already exists", success: false });
+          }
+      
+          const hashedPassword = await bcrypt.hash(validatedData.password, 10);
+          // Create a new user
+          const newUser = await prisma.user.create({
             data: {
-                email: validatedData.email,
-                password: hashedPassword,
-                role: validatedData.role,
-                profile: {
-                    create: {
-                        firstName: validatedData.firstName,
-                        lastName: validatedData.lastName,
-                        address: validatedData.address,
-                        phone: validatedData.phone,
-                        gender:validatedData.gender,
-                        dateOfBirth: new Date(validatedData.dateOfBirth),
-                    }
+              email: validatedData.email,
+              password: hashedPassword,
+              role: validatedData.role, // Add role field
+              profile: {
+                create: {
+                  firstName: validatedData.firstName,
+                  middleName: validatedData.middleName,
+                  lastName: validatedData.lastName,
+                  address: validatedData.address,
+                  phone: validatedData.phone,
+                  dateOfBirth: new Date(validatedData.dateOfBirth),
                 },
-                parent: { 
-                    create: {
-                        relationship: validatedData.relationship
-                    }
-                }
+              },
+              parent: {
+                create: {
+                  relationship: validatedData.relationship,
+                },
+              },
             },
             include: {
-                profile: true,
-                parent: true 
-            }
-        });
-        
-        res.status(201).json({ message: "Parent registered successfully", user: newUser });
-    } catch (error) {
-        console.error('Teacher registration error:', error);
-        res.status(500).send(error);
-    }
-},
+              profile: true,
+              parent: true,
+            },
+          });
+      
+          res.status(201).json({ message: "Parent registered successfully", success: true, user: newUser });
+        } catch (error) {
+          console.error('Parent registration error:', error);
+          res.status(500).send({
+            message: "Parent registration failed",
+            error: error.message,
+            status: 500
+          });
+        }
+      }
+,      
 registerStudent: async (req, res, next) => {
     try {
         const validatedData = registrarSchema.registerStudent.parse(req.body);

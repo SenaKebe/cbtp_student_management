@@ -187,18 +187,39 @@ const staffController = {
   },
   addClass: async (req, res, next) => {
     try {
+      console.log(req.body)
       const validatedData = adminSchema.addClass.parse(req.body);
       // Create a new class
       const newClass = await prisma.classroom.create({
-        data: {
-          className: validatedData.className,
-          Grade: validatedData.Grade,
-        },
+        data:{
+          className: req.body.className,
+          Grade: parseInt(req.body.Grade),
+          
+        }
       });
 
-      res
+      return res
         .status(201)
-        .json({ message: "Class added successfully", class: newClass });
+        .json({ message: "Class added successfully",success: true, class: newClass });
+    } catch (error) {
+      console.error("Error adding class:", error);
+      res.status(500).json({ message: "Error adding class" });
+    }
+  },
+  addSubjet: async (req, res, next) => {
+    try {
+      console.log(req.body)
+      const validatedData = adminSchema.addSubjet.parse(req.body);
+      // Create a new class
+      const newClass = await prisma.subject.create({
+        data:{
+          subjectName: req.body.subjectName,
+        }
+      });
+
+      return res
+        .status(201)
+        .json({ message: "subject added successfully",success: true, class: newClass });
     } catch (error) {
       console.error("Error adding class:", error);
       res.status(500).json({ message: "Error adding class" });

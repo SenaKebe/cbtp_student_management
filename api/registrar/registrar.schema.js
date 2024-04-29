@@ -17,6 +17,7 @@ const registrarSchema = {
     email: z.string().email(),
     password: z.string().min(6),  
     firstName: z.string(),
+    middleName: z.string(),
     lastName: z.string(),
     gender: z.string(),
     address: z.string(),
