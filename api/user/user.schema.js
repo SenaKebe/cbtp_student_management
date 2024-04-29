@@ -37,7 +37,7 @@ const adminSchema = {
     firstName: z.string(),
     middleName: z.string(),
     lastName: z.string(),
-    gender: z.string(),
+    // gender: z.string(),
     address: z.string(),
     phone: z.string().min(10), 
     dateOfBirth: z.string(),  

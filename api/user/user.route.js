@@ -1,22 +1,3 @@
-// import userController from "./user.controller.js";
-// import express from "express";
-// const userRoute = express.Router();
-//  userRoute.post("/register", userController.register);
-
-// export default userRoute;
-
-
-
-
-// import userController from "./user.controller.js";
-// import express from "express";
-// const userRoute = express.Router();
-// userRoute.post("/register", userController.registerParent);
-
-
-// export default userRoute;
-
-
 import express from 'express';
 import staffController from './usernew.controller.js';  // Ensure this path is correct
 import { auth,isAdmin } from '../../middleware/auth.js';
